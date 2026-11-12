@@ -1,6 +1,6 @@
 ---
 title: Triton Inference Server Architecture
-draft: true
+draft: false
 date: 2026-11-12
 description: "Triton Inference Server là gì, dùng khi nào và xử lý request ra sao? Giải thích kiến trúc từ nhu cầu đưa model AI vào ứng dụng."
 excerpt: "Khi nhiều service cần gọi model, mình cần một nơi nhận request, điều phối việc chạy và trả kết quả. Triton được xây dựng để lo phần phục vụ model này."
