@@ -1,5 +1,4 @@
 export const navigation = [
-  { label: 'Trang chủ', href: '/' },
   { label: 'Bài viết', href: '/blog/' },
   { label: 'Chủ đề', href: '/chu-de/' },
   { label: 'Giới thiệu', href: '/gioi-thieu/' },

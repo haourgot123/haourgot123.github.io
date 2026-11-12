@@ -1,0 +1,41 @@
+name: "densenet121"
+backend: "onnxruntime"
+max_batch_size: 8
+
+input [
+  {
+    name: "images"
+    data_type: TYPE_FP32
+    format: FORMAT_NCHW
+    dims: [3, 224, 224]
+  }
+]
+
+output [
+  {
+    name: "logits"
+    data_type: TYPE_FP32
+    dims: [1000]
+  }
+]
+
+dynamic_batching {
+  max_queue_delay_microseconds: 1000
+  default_queue_policy {
+    max_queue_size: 128
+    default_timeout_microseconds: 50000
+    timeout_action: REJECT
+  }
+}
+
+instance_group [
+  {
+    count: 1
+    kind: KIND_GPU
+    gpus: [0]
+  }
+]
+
+version_policy {
+  latest { num_versions: 1 }
+}

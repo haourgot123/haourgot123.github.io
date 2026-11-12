@@ -20,7 +20,7 @@
   --sl-nav-height: 4.5rem;
   --sl-sidebar-width: 18rem;
   --sl-content-width: 56rem;
-  --sl-text-h1: 2rem;
+  --sl-text-h1: 1.75rem;
   --sl-text-h2: 1.5rem;
   --sl-text-h3: 1.25rem;
   --sl-line-height: 1.7;
@@ -69,10 +69,146 @@ h1, .sl-markdown-content :is(h2, h3, h4) { font-weight: 600; letter-spacing: 0; 
 .sl-markdown-content { font-size: 1rem; line-height: 1.7; }
 .sl-markdown-content p { max-width: 78ch; }
 .sl-markdown-content :is(h2, h3) { margin-block-start: 2.25rem; }
-.sl-markdown-content .post-list h3 { margin-block: .65rem .75rem; }
 .sl-markdown-content a { text-underline-offset: .2em; }
 .sl-markdown-content :not(pre) > code { color: var(--sl-color-accent); background: var(--terminal-code-bg); border-radius: 0; }
 .sl-markdown-content .sl-heading-wrapper { --sl-icon-color: var(--sl-color-accent-high); }
+
+/* Give each post preview its own boundary without changing article typography. */
+main:has(.sl-blog-posts[data-blog-page='posts']) > .content-panel:first-of-type {
+  display: block;
+  padding-block-end: .5rem;
+}
+
+main:has(.sl-blog-posts[data-blog-page='posts']) h1 {
+  font-size: 1.5rem;
+}
+
+.sl-blog-posts {
+  gap: .75rem;
+}
+
+.sl-blog-posts .sl-blog-preview {
+  min-width: 0;
+  margin: 0;
+  padding: 1rem;
+  gap: .625rem;
+  border: 1px solid var(--sl-color-gray-5);
+  background: var(--sl-color-gray-6);
+}
+
+.sl-blog-posts .sl-blog-preview:focus-within {
+  border-color: var(--sl-color-accent);
+}
+
+.sl-blog-preview > :is(header, footer, .sl-blog-preview-excerpt) {
+  margin: 0;
+}
+
+.sl-blog-preview .sl-blog-preview-header {
+  display: grid;
+  gap: .375rem;
+}
+
+.sl-blog-preview .sl-blog-preview-link {
+  display: block;
+  margin: 0;
+  min-height: 0;
+}
+
+.sl-blog-preview .sl-blog-preview-title {
+  margin: 0;
+  font-size: 1.125rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.sl-blog-preview .sl-blog-preview-link:hover .sl-blog-preview-title {
+  color: var(--sl-color-accent-high);
+  text-decoration: underline;
+  text-underline-offset: .2em;
+}
+
+.sl-blog-preview .sl-blog-metadata {
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .375rem .75rem;
+}
+
+.sl-blog-preview :is(.sl-blog-metadata-items, .sl-blog-author-name) {
+  font-size: .75rem;
+  font-weight: 400;
+  line-height: 1.7;
+  color: var(--sl-color-gray-2);
+}
+
+.sl-blog-preview .sl-blog-author[href] .sl-blog-author-name {
+  color: var(--sl-color-gray-2);
+}
+
+.sl-blog-preview .sl-blog-author[href]:hover .sl-blog-author-name {
+  color: var(--sl-color-accent-high);
+  text-decoration: underline;
+}
+
+.sl-blog-preview .sl-blog-metadata-authors {
+  padding-inline-start: .75rem;
+  border-inline-start: 1px solid var(--sl-color-gray-4);
+}
+
+.sl-blog-preview .sl-blog-metadata-badges {
+  margin: 0;
+}
+
+.sl-blog-preview .sl-badge {
+  font-size: .75rem;
+}
+
+.sl-blog-preview .sl-blog-preview-excerpt {
+  font-size: .875rem;
+  color: var(--sl-color-gray-1);
+  line-height: 1.6;
+}
+
+.sl-blog-preview-excerpt > :first-child { margin-block-start: 0; }
+.sl-blog-preview-excerpt > :last-child { margin-block-end: 0; }
+
+.sl-blog-preview .sl-blog-tags,
+.sl-blog-preview .sl-blog-tags-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .5rem;
+  margin: 0;
+  padding: 0;
+}
+
+.sl-blog-preview .sl-blog-tags-label {
+  color: var(--sl-color-gray-2);
+  font-size: .75rem;
+  font-weight: 400;
+}
+
+.sl-blog-preview .sl-blog-tags-list li {
+  margin: 0;
+  padding: 0;
+}
+
+.sl-blog-preview .sl-blog-tag {
+  display: inline-flex;
+  align-items: center;
+  margin: 0;
+  padding: .2rem .5rem;
+  border-radius: 0;
+  font-size: .75rem;
+}
+
+@media (max-width: 49.99rem) {
+  .sl-blog-posts .sl-blog-preview { padding: .875rem; }
+  .sl-blog-preview .sl-blog-preview-title { font-size: 1.0625rem; }
+  .sl-blog-preview .sl-blog-preview-link { min-height: 44px; }
+  .sl-blog-preview .sl-blog-tag { min-height: 44px; }
+}
 
 .right-sidebar-container { border-inline-start-color: var(--sl-color-gray-5); }
 .right-sidebar-panel { padding-block-start: 1.75rem; }
@@ -101,7 +237,7 @@ site-search dialog { border: 1px solid var(--sl-color-gray-5); border-radius: 0;
 :focus-visible { outline: 2px solid var(--sl-color-accent-high); outline-offset: 4px; }
 
 @media (max-width: 49.99rem) {
-  :root { --sl-nav-height: 4rem; --sl-text-h1: 1.7rem; --sl-text-h2: 1.3rem; }
+  :root { --sl-nav-height: 4rem; --sl-text-h1: 1.5rem; --sl-text-h2: 1.3rem; }
   .site-title { font-size: .9rem; }
   .sl-markdown-content { font-size: 1rem; }
   .sidebar a { min-height: 44px; }

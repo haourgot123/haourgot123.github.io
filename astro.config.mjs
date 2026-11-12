@@ -6,6 +6,7 @@ import { navigation } from './src/lib/navigation.ts';
 export default defineConfig({
   site: 'https://haourgot123.github.io',
   trailingSlash: 'always',
+  redirects: { '/': '/blog/' },
   integrations: [
     starlight({
       // Đổi tên blog tại đây.
