@@ -1,0 +1,9 @@
+---
+import ContentsLinks from './ContentsLinks.astro';
+const { toc } = Astro.locals.starlightRoute;
+---
+
+{toc && <nav data-blog-toc aria-label={Astro.locals.t('tableOfContents.onThisPage')}>
+  <h2>{Astro.locals.t('tableOfContents.onThisPage')}</h2>
+  <ContentsLinks items={toc.items} />
+</nav>}

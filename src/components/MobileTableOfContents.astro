@@ -1,0 +1,24 @@
+---
+import { Icon } from '@astrojs/starlight/components';
+import ContentsLinks from './ContentsLinks.astro';
+const { toc } = Astro.locals.starlightRoute;
+---
+
+{toc && <nav class="mobile-contents" data-blog-toc aria-label={Astro.locals.t('tableOfContents.onThisPage')}>
+  <details>
+    <summary><span>{Astro.locals.t('tableOfContents.onThisPage')} <Icon name="down-caret" /></span><span data-current-heading>{toc.items[0]?.text}</span></summary>
+    <div class="contents-dropdown"><ContentsLinks items={toc.items} /></div>
+  </details>
+</nav>}
+
+<style>
+  nav { position: fixed; z-index: var(--sl-z-index-toc); top: var(--sl-nav-height); inset-inline: 0; background: var(--sl-color-black); border-block: 1px solid var(--sl-color-gray-5); }
+  summary { display: flex; gap: 1rem; align-items: center; height: var(--sl-mobile-toc-height); padding-inline: 1rem; list-style: none; font-size: .8125rem; cursor: pointer; }
+  summary::-webkit-details-marker { display: none; }
+  summary > span:first-child { display: inline-flex; align-items: center; gap: .5rem; flex-shrink: 0; }
+  [data-current-heading] { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--sl-color-gray-2); }
+  .contents-dropdown { max-height: 60vh; overflow-y: auto; border-top: 1px solid var(--sl-color-gray-5); }
+  .contents-dropdown :global(a) { display: block; padding: .75rem 1rem; color: var(--sl-color-gray-2); font-size: .875rem; text-decoration: none; }
+  .contents-dropdown :global(a[aria-current]) { color: var(--sl-color-accent-high); background: var(--sl-color-accent-low); }
+  @media (min-width: 50rem) { nav { inset-inline-start: var(--sl-content-inline-start); } }
+</style>

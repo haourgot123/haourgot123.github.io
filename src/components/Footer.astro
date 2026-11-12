@@ -1,0 +1,11 @@
+---
+import DefaultFooter from '@astrojs/starlight/components/Footer.astro';
+
+const emptyBlog = Astro.url.pathname.replace(/\/$/, '') === '/blog' && Astro.locals.starlightBlog.posts.length === 0;
+---
+
+{emptyBlog && <div class="sl-markdown-content">
+  <h1>Bài viết</h1>
+  <p>Chưa có bài viết được đăng.</p>
+</div>}
+<DefaultFooter />

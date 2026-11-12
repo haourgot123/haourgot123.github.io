@@ -1,0 +1,85 @@
+---
+import type { StarlightRouteData } from '@astrojs/starlight/route-data';
+interface Props { items: NonNullable<StarlightRouteData['toc']>['items']; }
+---
+
+<ul class="contents-links">
+  {Astro.props.items.map((item) => (
+    <li>
+      <a href={`#${encodeURIComponent(item.slug)}`} aria-current={item.slug === '_top' ? 'true' : undefined}>{item.text}</a>
+      {item.children.length > 0 && <Astro.self items={item.children} />}
+    </li>
+  ))}
+</ul>
+
+<style>
+  ul { list-style: none; margin: 0; padding: 0; }
+  ul ul { padding-inline-start: .75rem; }
+</style>
+
+<script>
+  const regions = [...document.querySelectorAll<HTMLElement>('[data-blog-toc]')];
+  const links = regions.flatMap((region) => [...region.querySelectorAll<HTMLAnchorElement>('a[href^="#"]')]);
+  const headings = [...new Set(links.map((link) => decodeURIComponent(link.hash.slice(1))))]
+    .map((id) => document.getElementById(id)).filter((heading): heading is HTMLElement => heading !== null);
+
+  function setCurrent(id: string) {
+    for (const link of links) {
+      if (decodeURIComponent(link.hash.slice(1)) === id) link.setAttribute('aria-current', 'true');
+      else link.removeAttribute('aria-current');
+    }
+    const label = links.find((link) => decodeURIComponent(link.hash.slice(1)) === id)?.textContent ?? '';
+    document.querySelectorAll('[data-current-heading]').forEach((display) => { display.textContent = label; });
+  }
+
+  function updateCurrent() {
+    if (!headings.length) return;
+    const headerBottom = document.querySelector('header.header')?.getBoundingClientRect().bottom ?? 0;
+    const summaryBottom = document.querySelector('[data-blog-toc] summary')?.getBoundingClientRect().bottom ?? 0;
+    const threshold = Math.max(headerBottom, summaryBottom) + 24;
+    let current = headings[0];
+    for (const heading of headings) {
+      if (heading.getBoundingClientRect().top <= threshold) current = heading;
+    }
+    // Short pages cannot scroll far enough to bring the final heading above the header.
+    if (scrollY > 1 && scrollY + innerHeight >= document.documentElement.scrollHeight - 2) {
+      for (const heading of headings) {
+        if (heading.getBoundingClientRect().top < innerHeight - 24) current = heading;
+      }
+    }
+    if (current) setCurrent(current.id);
+  }
+
+  let scheduled = false;
+  function scheduleUpdate() {
+    if (scheduled) return;
+    scheduled = true;
+    requestAnimationFrame(() => { scheduled = false; updateCurrent(); });
+  }
+  window.addEventListener('scroll', scheduleUpdate, { passive: true });
+  window.addEventListener('resize', scheduleUpdate);
+  window.addEventListener('hashchange', scheduleUpdate);
+  window.addEventListener('pageshow', scheduleUpdate);
+
+  for (const link of links) {
+    link.addEventListener('click', () => {
+      setCurrent(decodeURIComponent(link.hash.slice(1)));
+      const details = link.closest('details');
+      if (details) details.open = false;
+    });
+  }
+  for (const region of regions) {
+    const details = region.querySelector('details');
+    if (!details) continue;
+    document.addEventListener('click', (event) => {
+      if (event.target instanceof Node && !details.contains(event.target)) details.open = false;
+    });
+    document.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape' || !details.open) return;
+      const restoreFocus = details.contains(document.activeElement);
+      details.open = false;
+      if (restoreFocus) details.querySelector('summary')?.focus();
+    });
+  }
+  scheduleUpdate();
+</script>

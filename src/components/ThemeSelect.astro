@@ -1,0 +1,146 @@
+---
+import { Icon } from '@astrojs/starlight/components';
+
+const menuId = `theme-menu-${crypto.randomUUID()}`;
+const choices = [
+  { value: 'dark', label: 'Tối', icon: 'moon' },
+  { value: 'light', label: 'Sáng', icon: 'sun' },
+  { value: 'auto', label: 'Tự động', icon: 'laptop' },
+] as const;
+---
+
+<terminal-theme-select>
+  <button class="theme-trigger" type="button" popovertarget={menuId} aria-haspopup="menu" aria-expanded="false" aria-controls={menuId} aria-label="Giao diện: Tối">
+    {choices.map(({ value, icon }) => <span data-active-icon={value} hidden={value !== 'dark'}><Icon name={icon} /></span>)}
+    <span data-theme-label>Tối</span>
+    <Icon name="down-caret" size=".875rem" />
+  </button>
+  <div class="theme-menu" id={menuId} popover="auto" role="menu" aria-label="Chọn giao diện">
+    {choices.map(({ value, label, icon }) => (
+      <button type="button" class="theme-option" role="menuitemradio" aria-checked={value === 'dark' ? 'true' : 'false'} data-theme={value} tabindex="-1">
+        <Icon name={icon} />
+        <span>{label}</span>
+        <svg class="theme-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m5 12 4 4L19 6" /></svg>
+      </button>
+    ))}
+  </div>
+</terminal-theme-select>
+
+<script>
+  type Theme = 'dark' | 'light' | 'auto';
+  const storageKey = 'starlight-theme';
+  const systemTheme = matchMedia('(prefers-color-scheme: light)');
+
+  function readTheme(): Theme {
+    try {
+      const stored = localStorage.getItem(storageKey);
+      return stored === 'light' || stored === 'dark' ? stored : stored === '' ? 'auto' : 'dark';
+    } catch { return 'dark'; }
+  }
+
+  function applyTheme(theme: Theme) {
+    document.documentElement.dataset.theme = theme === 'auto' ? (systemTheme.matches ? 'light' : 'dark') : theme;
+    document.querySelectorAll('terminal-theme-select').forEach((picker) => {
+      if (picker instanceof TerminalThemeSelect) picker.update(theme);
+    });
+  }
+
+  class TerminalThemeSelect extends HTMLElement {
+    private trigger!: HTMLButtonElement;
+    private menu!: HTMLDivElement;
+    private items: HTMLButtonElement[] = [];
+    private initialFocus?: number;
+
+    connectedCallback() {
+      this.trigger = this.querySelector<HTMLButtonElement>('.theme-trigger')!;
+      this.menu = this.querySelector<HTMLDivElement>('.theme-menu')!;
+      this.items = [...this.querySelectorAll<HTMLButtonElement>('.theme-option')];
+      applyTheme(readTheme());
+
+      this.menu.addEventListener('toggle', (event) => {
+        const open = (event as ToggleEvent).newState === 'open';
+        this.trigger.setAttribute('aria-expanded', String(open));
+        if (open) {
+          this.positionMenu();
+          (this.items[this.initialFocus ?? this.items.findIndex((item) => item.getAttribute('aria-checked') === 'true')] ?? this.items[0])?.focus();
+          this.initialFocus = undefined;
+        }
+      });
+
+      this.trigger.addEventListener('keydown', (event) => {
+        if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
+        event.preventDefault();
+        this.initialFocus = event.key === 'ArrowDown' ? 0 : this.items.length - 1;
+        this.menu.showPopover();
+      });
+
+      this.menu.addEventListener('keydown', (event) => {
+        const index = this.items.indexOf(document.activeElement as HTMLButtonElement);
+        const next = event.key === 'ArrowDown' ? (index + 1) % this.items.length
+          : event.key === 'ArrowUp' ? (index - 1 + this.items.length) % this.items.length
+          : event.key === 'Home' ? 0 : event.key === 'End' ? this.items.length - 1 : undefined;
+        if (next !== undefined) {
+          event.preventDefault();
+          this.items[next]?.focus();
+        } else if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          this.items[index]?.click();
+        } else if (event.key === 'Escape' || event.key === 'Tab') {
+          if (event.key === 'Escape') event.preventDefault();
+          this.menu.hidePopover();
+          this.trigger.focus();
+        }
+      });
+
+      for (const item of this.items) {
+        item.addEventListener('click', () => {
+          const theme = item.dataset.theme as Theme;
+          try { localStorage.setItem(storageKey, theme === 'auto' ? '' : theme); } catch {}
+          applyTheme(theme);
+          this.menu.hidePopover();
+          this.trigger.focus();
+        });
+      }
+    }
+
+    update(theme: Theme) {
+      if (!this.trigger || this.items.length === 0) return;
+      const selected = this.items.find((item) => item.dataset.theme === theme)!;
+      const label = selected.querySelector('span')!.textContent!;
+      this.querySelector('[data-theme-label]')!.textContent = label;
+      this.trigger.setAttribute('aria-label', `Giao diện: ${label}`);
+      this.items.forEach((item) => item.setAttribute('aria-checked', String(item.dataset.theme === theme)));
+      this.querySelectorAll<HTMLElement>('[data-active-icon]').forEach((icon) => {
+        icon.toggleAttribute('hidden', icon.dataset.activeIcon !== theme);
+      });
+    }
+
+    positionMenu() {
+      if (!this.menu.matches(':popover-open')) return;
+      const trigger = this.trigger.getBoundingClientRect();
+      const menu = this.menu.getBoundingClientRect();
+      this.menu.style.left = `${Math.max(8, Math.min(trigger.right - menu.width, innerWidth - menu.width - 8))}px`;
+      this.menu.style.top = `${trigger.bottom + menu.height + 8 <= innerHeight ? trigger.bottom + 8 : Math.max(8, trigger.top - menu.height - 8)}px`;
+    }
+  }
+
+  customElements.define('terminal-theme-select', TerminalThemeSelect);
+  systemTheme.addEventListener('change', () => { if (readTheme() === 'auto') applyTheme('auto'); });
+  window.addEventListener('storage', (event) => { if (event.key === storageKey) applyTheme(readTheme()); });
+  window.addEventListener('resize', () => document.querySelectorAll<TerminalThemeSelect>('terminal-theme-select').forEach((picker) => picker.positionMenu()));
+</script>
+
+<style>
+  terminal-theme-select { display: inline-block; font-family: var(--sl-font); font-size: .875rem; }
+  button { display: flex; align-items: center; gap: .6rem; min-height: 44px; padding: .5rem .65rem; color: var(--sl-color-gray-2); font: inherit; line-height: 1.5; cursor: pointer; border: 0; border-radius: 0; background: transparent; }
+  svg { flex-shrink: 0; width: 1rem; height: 1rem; }
+  [data-active-icon] { display: inline-flex; }
+  [data-active-icon][hidden] { display: none; }
+  .theme-trigger:hover, .theme-trigger[aria-expanded='true'] { color: var(--sl-color-accent-high); background: var(--sl-color-accent-low); }
+  .theme-menu { position: fixed; inset: auto; width: 12rem; max-width: calc(100vw - 1rem); padding: .35rem; margin: 0; color: var(--sl-color-white); background: var(--sl-color-black); border: 1px solid var(--sl-color-gray-5); border-radius: 0; box-shadow: none; }
+  .theme-option { width: 100%; text-align: start; }
+  .theme-option span { flex: 1; }
+  .theme-option:hover, .theme-option:focus-visible, .theme-option[aria-checked='true'] { color: var(--sl-color-accent-high); background: var(--sl-color-accent-low); }
+  .theme-option:focus-visible { outline-offset: -2px; }
+  .theme-option[aria-checked='false'] .theme-check { visibility: hidden; }
+</style>

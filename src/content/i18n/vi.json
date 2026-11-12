@@ -1,0 +1,22 @@
+{
+  "starlightBlog.authors.count_one": "{{count}} bài viết của {{author}}",
+  "starlightBlog.authors.count_other": "{{count}} bài viết của {{author}}",
+  "starlightBlog.metrics.readingTime.minutes": " · {{count}} phút đọc",
+  "starlightBlog.metrics.words_one": " · {{count}} từ",
+  "starlightBlog.metrics.words_other": " · {{count}} từ",
+  "starlightBlog.pagination.prev": "Bài mới hơn",
+  "starlightBlog.pagination.next": "Bài cũ hơn",
+  "starlightBlog.post.date": "{{date, datetime(dateStyle: medium)}}",
+  "starlightBlog.post.lastUpdate": " · Cập nhật: <time datetime=\"{{isoDate}}\">{{date, datetime(dateStyle: medium)}}</time>",
+  "starlightBlog.post.draft": "Bản nháp",
+  "starlightBlog.post.featured": "Nổi bật",
+  "starlightBlog.post.tags": "Chủ đề:",
+  "starlightBlog.sidebar.all": "Tất cả bài viết",
+  "starlightBlog.sidebar.featured": "Bài nổi bật",
+  "starlightBlog.sidebar.recent": "Bài gần đây",
+  "starlightBlog.sidebar.tags": "Chủ đề",
+  "starlightBlog.sidebar.authors": "Tác giả",
+  "starlightBlog.sidebar.rss": "Theo dõi RSS",
+  "starlightBlog.tags.count_one": "{{count}} bài viết về {{tag}}",
+  "starlightBlog.tags.count_other": "{{count}} bài viết về {{tag}}"
+}

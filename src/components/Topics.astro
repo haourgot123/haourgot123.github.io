@@ -1,0 +1,21 @@
+---
+const tags = new Map<string, { label: string; href: string; count: number }>();
+for (const post of Astro.locals.starlightBlog.posts) {
+  for (const tag of post.tags) {
+    const existing = tags.get(tag.label);
+    tags.set(tag.label, { ...tag, count: (existing?.count ?? 0) + 1 });
+  }
+}
+const topics = [...tags.values()].sort((a, b) => a.label.localeCompare(b.label, 'vi'));
+---
+
+{topics.length === 0 ? <p>Chủ đề sẽ xuất hiện khi có bài viết được đăng.</p> : <ul class="topics">
+  {topics.map((tag) => <li><a href={tag.href}>{tag.label}</a><span>{tag.count} bài viết</span></li>)}
+</ul>}
+
+<style>
+  .topics { list-style: none; padding: 0; }
+  li { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 1rem 0; border-bottom: 1px solid var(--sl-color-hairline-light); }
+  a { font-weight: 600; }
+  span { color: var(--sl-color-gray-2); font-size: .875rem; }
+</style>
